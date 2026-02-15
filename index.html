@@ -320,6 +320,30 @@
             color: #c9a962;
         }
 
+        /* Діагностика — показує яке фото знайдено */
+        .debug-info {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.9);
+            border: 1px solid #c9a962;
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 11px;
+            z-index: 9999;
+            max-width: 300px;
+            line-height: 1.5;
+        }
+
+        .debug-info.success {
+            border-color: #4CAF50;
+        }
+
+        .debug-info.error {
+            border-color: #ff6b6b;
+        }
+
         @media (max-width: 400px) {
             .section-block {
                 padding: 25px 20px;
@@ -339,18 +363,18 @@
             <div class="gold-sub">в сфері краси та здоров'я</div>
         </div>
 
-        <picture>
-            <source srcset="photo.webp" type="image/webp">
-            <source srcset="photo.jpg" type="image/jpeg">
-            <img
-                src="photo.jpg"
-                class="hero-image"
-                alt="Марина Приходько"
-                loading="eager"
-                decoding="async"
-                onerror="this.style.border='3px solid red'; this.style.minHeight='400px'; this.style.background='#1a1a1a'; this.alt='⚠️ ФОТО НЕ ЗНАЙДЕНО — перевірте назву файлу';"
-            >
-        </picture>
+        <!--
+            ФОТО: скрипт автоматично спробує знайти файл серед варіантів:
+            photo.jpg, photo.jpeg, photo.JPG, photo.JPEG, photo.png, photo.PNG, photo.webp
+            Просто покладіть фото в ту саму папку що й цей HTML файл.
+        -->
+        <img
+            id="hero-photo"
+            class="hero-image"
+            alt="Марина Приходько"
+            loading="eager"
+            decoding="async"
+        >
 
         <div class="name-plate-on-photo">
             <h2>МАРИНА ПРИХОДЬКО</h2>
@@ -443,7 +467,90 @@
         <p>© 2024 <span>Марина Приходько</span>. Всі права захищені.</p>
     </footer>
 
+    <!-- Діагностика (видаліть після налаштування) -->
+    <div class="debug-info" id="debug-box">🔍 Шукаю фото...</div>
+
     <script>
+        // ===== АВТОПОШУК ФОТО =====
+        const heroImg = document.getElementById('hero-photo');
+        const debugBox = document.getElementById('debug-box');
+
+        // Всі можливі назви файлу
+        const photoVariants = [
+            'photo.jpg',
+            'photo.jpeg',
+            'photo.JPG',
+            'photo.JPEG',
+            'photo.png',
+            'photo.PNG',
+            'photo.webp',
+            'photo.WEBP',
+            'Photo.jpg',
+            'Photo.jpeg',
+            'Photo.JPG',
+            'Photo.png',
+            'IMG_0001.jpg',
+            'IMG_0001.jpeg',
+            'image.jpg',
+            'image.jpeg',
+            'image.png',
+            'img.jpg',
+            'foto.jpg',
+            'hero.jpg',
+            'hero.png',
+            'marina.jpg',
+            'marina.jpeg',
+            'marina.png',
+            './photo.jpg',
+            './photo.jpeg',
+            './photo.png',
+            'images/photo.jpg',
+            'img/photo.jpg'
+        ];
+
+        let currentIndex = 0;
+        let found = false;
+
+        function tryNextPhoto() {
+            if (currentIndex >= photoVariants.length) {
+                // Нічого не знайдено
+                debugBox.classList.add('error');
+                debugBox.innerHTML = '❌ <b>Фото не знайдено!</b><br><br>' +
+                    '📁 Перевірте:<br>' +
+                    '1. Файл фото лежить в тій самій папці<br>' +
+                    '2. Перейменуйте фото в <b>photo.jpg</b><br>' +
+                    '3. Натисніть правою кнопкою → "Перейменувати"<br><br>' +
+                    '📌 Поточна папка:<br>' + window.location.href;
+                return;
+            }
+
+            const testImg = new Image();
+            const variant = photoVariants[currentIndex];
+
+            testImg.onload = function() {
+                // Знайдено!
+                found = true;
+                heroImg.src = variant;
+                debugBox.classList.add('success');
+                debugBox.innerHTML = '✅ <b>Фото знайдено!</b><br>Файл: ' + variant;
+
+                // Ховаємо підказку через 3 секунди
+                setTimeout(() => {
+                    debugBox.style.display = 'none';
+                }, 3000);
+            };
+
+            testImg.onerror = function() {
+                currentIndex++;
+                tryNextPhoto();
+            };
+
+            testImg.src = variant;
+        }
+
+        tryNextPhoto();
+
+        // ===== FADE IN =====
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -456,6 +563,7 @@
             observer.observe(el);
         });
 
+        // ===== INSTAGRAM =====
         const igLink = document.getElementById('ig-link');
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         const isAndroid = /Android/i.test(navigator.userAgent);
@@ -470,14 +578,6 @@
                 }
             });
         }
-
-        const heroImg = document.querySelector('.hero-image');
-        heroImg.addEventListener('error', function() {
-            console.error('❌ Фото не знайдено!');
-        });
-        heroImg.addEventListener('load', function() {
-            console.log('✅ Фото завантажено успішно!');
-        });
     </script>
 
 </body>

@@ -541,7 +541,6 @@
 
         <a href="index.html" class="btn-back-top fade-in">← Назад</a>
 
-
         <div class="divider-dots">◆ ◆ ◆</div>
 
         <div class="section-block fade-in">
@@ -591,71 +590,69 @@
             <h2>Анкета</h2>
             <p class="form-subtitle">Заповни анкету і я зв'яжусь з тобою</p>
 
-            <form id="contact-form" action="https://formspree.io/f/mlgwbakb" method="POST">
-
-                <input type="hidden" name="_subject" value="Нова анкета з сайту ✦">
+            <form id="contact-form">
 
                 <div class="form-group">
                     <label>Ім'я та прізвище</label>
-                    <input type="text" name="Ім'я та прізвище" placeholder="Ваше ім'я та прізвище" required>
+                    <input type="text" name="name" placeholder="Ваше ім'я та прізвище" required>
                 </div>
 
                 <div class="form-group">
                     <label>Номер телефону</label>
-                    <input type="tel" name="Телефон" placeholder="+380 __ ___ __ __" required>
+                    <input type="tel" name="phone" placeholder="+380 __ ___ __ __" required>
                 </div>
 
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" name="Email" placeholder="your@email.com" required>
+                    <input type="email" name="email" placeholder="your@email.com" required>
                 </div>
 
                 <div class="form-group">
                     <label>Місто / країна</label>
-                    <input type="text" name="Місто / країна" placeholder="Ваше місто або країна" required>
+                    <input type="text" name="city" placeholder="Ваше місто або країна" required>
                 </div>
 
                 <div class="form-group">
                     <label>Посада або сфера діяльності</label>
-                    <input type="text" name="Посада / сфера діяльності" placeholder="Чим ви займаєтесь?" required>
+                    <input type="text" name="occupation" placeholder="Чим ви займаєтесь?" required>
                 </div>
 
                 <div class="form-group">
                     <label>Посилання на Instagram</label>
-                    <input type="text" name="Instagram" placeholder="@your_instagram">
+                    <input type="text" name="instagram" placeholder="@your_instagram">
                 </div>
 
                 <div class="form-group">
                     <label>Поточний дохід на місяць</label>
-                    <input type="text" name="Поточний дохід" placeholder="Вкажіть суму" required>
+                    <input type="text" name="current_income" placeholder="Вкажіть суму" required>
                 </div>
 
                 <div class="form-group">
                     <label>Бажаний дохід на місяць</label>
-                    <input type="text" name="Бажаний дохід" placeholder="Вкажіть бажану суму" required>
+                    <input type="text" name="desired_income" placeholder="Вкажіть бажану суму" required>
                 </div>
 
                 <div class="radio-group">
                     <label class="radio-title">Скільки часу готові приділяти бізнесу з LR?</label>
                     <div class="radio-options">
                         <div class="radio-option">
-                            <input type="radio" name="Час для бізнесу" id="time1" value="1–2 години" required>
+                            <input type="radio" name="time_available" id="time1" value="1-2 години" required>
                             <label for="time1">1–2 години</label>
                         </div>
                         <div class="radio-option">
-                            <input type="radio" name="Час для бізнесу" id="time2" value="2–4 години">
+                            <input type="radio" name="time_available" id="time2" value="2-4 години">
                             <label for="time2">2–4 години</label>
                         </div>
                         <div class="radio-option">
-                            <input type="radio" name="Час для бізнесу" id="time3" value="4–6 годин">
+                            <input type="radio" name="time_available" id="time3" value="4-6 годин">
                             <label for="time3">4–6 годин</label>
                         </div>
                         <div class="radio-option">
-                            <input type="radio" name="Час для бізнесу" id="time4" value="більше 6 годин">
+                            <input type="radio" name="time_available" id="time4" value="bilshe 6 godyn">
                             <label for="time4">більше 6 годин</label>
                         </div>
                         <div class="radio-option">
-                            <input type="radio" name="Час для бізнесу" id="time5" value="повна зайнятість">
+                            <input type="radio" name="time_available" id="time5" value="povna zayniatist">
                             <label for="time5">повна зайнятість</label>
                         </div>
                     </div>
@@ -716,7 +713,6 @@
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // Блокуємо кнопку
             submitBtn.disabled = true;
             submitBtn.textContent = 'Надсилаю...';
             errorMsg.classList.remove('show');
@@ -730,18 +726,19 @@
                     'Accept': 'application/json'
                 }
             })
-            .then(response => {
+            .then(function(response) {
                 if (response.ok) {
-                    // Успіх
                     form.style.display = 'none';
                     successMsg.classList.add('show');
                     successMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 } else {
-                    throw new Error('Помилка відправки');
+                    return response.json().then(function(data) {
+                        throw new Error(data.error || 'Server error');
+                    });
                 }
             })
-            .catch(error => {
-                console.error('❌ Помилка:', error);
+            .catch(function(error) {
+                console.error('Error:', error);
                 errorMsg.classList.add('show');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Надіслати анкету ✦';
